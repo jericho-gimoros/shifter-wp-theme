@@ -1,188 +1,180 @@
 <?php
 /**
- * Hestia functions and definitions
+ * zozo-theme functions and definitions
  *
- * @package Hestia
- * @since   Hestia 1.0
+ * @link https://developer.wordpress.org/themes/basics/theme-functions/
+ *
+ * @package zozo-theme
  */
 
-define( 'HESTIA_VERSION', '3.0.20' );
-define( 'HESTIA_VENDOR_VERSION', '1.0.2' );
-define( 'HESTIA_PHP_INCLUDE', trailingslashit( get_template_directory() ) . 'inc/' );
-define( 'HESTIA_CORE_DIR', HESTIA_PHP_INCLUDE . 'core/' );
-
-if ( ! defined( 'HESTIA_DEBUG' ) ) {
-	define( 'HESTIA_DEBUG', false );
+if ( ! defined( '_S_VERSION' ) ) {
+	// Replace the version number of the theme on each release.
+	define( '_S_VERSION', '1.0.0' );
 }
 
-// Load hooks
-require_once( HESTIA_PHP_INCLUDE . 'hooks/hooks.php' );
-
-// Load Helper Globally Scoped Functions
-require_once( HESTIA_PHP_INCLUDE . 'helpers/sanitize-functions.php' );
-require_once( HESTIA_PHP_INCLUDE . 'helpers/layout-functions.php' );
-
-if ( class_exists( 'WooCommerce', false ) ) {
-	require_once( HESTIA_PHP_INCLUDE . 'compatibility/woocommerce/functions.php' );
-}
-
-if ( function_exists( 'max_mega_menu_is_enabled' ) ) {
-	require_once( HESTIA_PHP_INCLUDE . 'compatibility/max-mega-menu/functions.php' );
-}
-
-// Load starter content
-require_once( HESTIA_PHP_INCLUDE . 'compatibility/class-hestia-starter-content.php' );
-
-
-/**
- * Adds notice for PHP < 5.3.29 hosts.
- */
-function hestia_no_support_5_3() {
-	$message = __( 'Hey, we\'ve noticed that you\'re running an outdated version of PHP which is no longer supported. Make sure your site is fast and secure, by upgrading PHP to the latest version.', 'hestia' );
-
-	printf( '<div class="error"><p>%1$s</p></div>', esc_html( $message ) );
-}
-
-
-if ( version_compare( PHP_VERSION, '5.3.29' ) < 0 ) {
+if ( ! function_exists( 'zozo_theme_setup' ) ) :
 	/**
-	 * Add notice for PHP upgrade.
+	 * Sets up theme defaults and registers support for various WordPress features.
+	 *
+	 * Note that this function is hooked into the after_setup_theme hook, which
+	 * runs before the init hook. The init hook is too late for some features, such
+	 * as indicating support for post thumbnails.
 	 */
-	add_filter( 'template_include', '__return_null', 99 );
-	switch_theme( WP_DEFAULT_THEME );
-	unset( $_GET['activated'] );
-	add_action( 'admin_notices', 'hestia_no_support_5_3' );
+	function zozo_theme_setup() {
+		/*
+		 * Make theme available for translation.
+		 * Translations can be filed in the /languages/ directory.
+		 * If you're building a theme based on zozo-theme, use a find and replace
+		 * to change 'zozo-theme' to the name of your theme in all the template files.
+		 */
+		load_theme_textdomain( 'zozo-theme', get_template_directory() . '/languages' );
 
-	return;
+		// Add default posts and comments RSS feed links to head.
+		add_theme_support( 'automatic-feed-links' );
+
+		/*
+		 * Let WordPress manage the document title.
+		 * By adding theme support, we declare that this theme does not use a
+		 * hard-coded <title> tag in the document head, and expect WordPress to
+		 * provide it for us.
+		 */
+		add_theme_support( 'title-tag' );
+
+		/*
+		 * Enable support for Post Thumbnails on posts and pages.
+		 *
+		 * @link https://developer.wordpress.org/themes/functionality/featured-images-post-thumbnails/
+		 */
+		add_theme_support( 'post-thumbnails' );
+
+		// This theme uses wp_nav_menu() in one location.
+		register_nav_menus(
+			array(
+				'menu-1' => esc_html__( 'Primary', 'zozo-theme' ),
+			)
+		);
+
+		/*
+		 * Switch default core markup for search form, comment form, and comments
+		 * to output valid HTML5.
+		 */
+		add_theme_support(
+			'html5',
+			array(
+				'search-form',
+				'comment-form',
+				'comment-list',
+				'gallery',
+				'caption',
+				'style',
+				'script',
+			)
+		);
+
+		// Set up the WordPress core custom background feature.
+		add_theme_support(
+			'custom-background',
+			apply_filters(
+				'zozo_theme_custom_background_args',
+				array(
+					'default-color' => 'ffffff',
+					'default-image' => '',
+				)
+			)
+		);
+
+		// Add theme support for selective refresh for widgets.
+		add_theme_support( 'customize-selective-refresh-widgets' );
+
+		/**
+		 * Add support for core custom logo.
+		 *
+		 * @link https://codex.wordpress.org/Theme_Logo
+		 */
+		add_theme_support(
+			'custom-logo',
+			array(
+				'height'      => 250,
+				'width'       => 250,
+				'flex-width'  => true,
+				'flex-height' => true,
+			)
+		);
+	}
+endif;
+add_action( 'after_setup_theme', 'zozo_theme_setup' );
+
+/**
+ * Set the content width in pixels, based on the theme's design and stylesheet.
+ *
+ * Priority 0 to make it available to lower priority callbacks.
+ *
+ * @global int $content_width
+ */
+function zozo_theme_content_width() {
+	$GLOBALS['content_width'] = apply_filters( 'zozo_theme_content_width', 640 );
 }
+add_action( 'after_setup_theme', 'zozo_theme_content_width', 0 );
 
 /**
- * Begins execution of the theme core.
+ * Register widget area.
  *
- * Since everything within the plugin is registered via hooks,
- * then kicking off the plugin from this point in the file does
- * not affect the page life cycle.
- *
- * @since    1.0.0
+ * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
  */
-function hestia_run() {
-
-	require_once HESTIA_CORE_DIR . 'class-hestia-autoloader.php';
-	$autoloader = new Hestia_Autoloader();
-
-	spl_autoload_register( array( $autoloader, 'loader' ) );
-
-	new Hestia_Core();
-
-	$vendor_file = trailingslashit( get_template_directory() ) . 'vendor/composer/autoload_files.php';
-	if ( is_readable( $vendor_file ) ) {
-		$files = require_once $vendor_file;
-		foreach ( $files as $file ) {
-			if ( is_readable( $file ) ) {
-				include_once $file;
-			}
-		}
-	}
-	add_filter( 'themeisle_sdk_products', 'hestia_load_sdk' );
-
-	if ( class_exists( 'Ti_White_Label', false ) ) {
-		Ti_White_Label::instance( get_template_directory() . '/style.css' );
-	}
-}
-
-/**
- * Loads products array.
- *
- * @param array $products All products.
- *
- * @return array Products array.
- */
-function hestia_load_sdk( $products ) {
-	$products[] = get_template_directory() . '/style.css';
-
-	return $products;
-}
-
-require_once( HESTIA_CORE_DIR . 'class-hestia-autoloader.php' );
-
-/**
- * The start of the app.
- *
- * @since   1.0.0
- */
-hestia_run();
-
-/**
- * Append theme name to the upgrade link
- * If the active theme is child theme of Hestia
- *
- * @param string $link - Current link.
- *
- * @return string $link - New upgrade link.
- * @package hestia
- * @since   1.1.75
- */
-function hestia_upgrade_link( $link ) {
-
-	$theme_name = wp_get_theme()->get_stylesheet();
-
-	$hestia_child_themes = array(
-		'orfeo',
-		'fagri',
-		'tiny-hestia',
-		'christmas-hestia',
-		'jinsy-magazine',
-	);
-
-	if ( $theme_name === 'hestia' ) {
-		return $link;
-	}
-
-	if ( ! in_array( $theme_name, $hestia_child_themes, true ) ) {
-		return $link;
-	}
-
-	$link = add_query_arg(
+function zozo_theme_widgets_init() {
+	register_sidebar(
 		array(
-			'theme' => $theme_name,
-		),
-		$link
+			'name'          => esc_html__( 'Sidebar', 'zozo-theme' ),
+			'id'            => 'sidebar-1',
+			'description'   => esc_html__( 'Add widgets here.', 'zozo-theme' ),
+			'before_widget' => '<section id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</section>',
+			'before_title'  => '<h2 class="widget-title">',
+			'after_title'   => '</h2>',
+		)
 	);
-
-	return $link;
 }
-
-add_filter( 'hestia_upgrade_link_from_child_theme_filter', 'hestia_upgrade_link' );
+add_action( 'widgets_init', 'zozo_theme_widgets_init' );
 
 /**
- * Check if $no_seconds have passed since theme was activated.
- * Used to perform certain actions, like displaying upsells or add a new recommended action in About Hestia page.
- *
- * @param integer $no_seconds number of seconds.
- *
- * @return bool
- * @since  1.1.45
- * @access public
+ * Enqueue scripts and styles.
  */
-function hestia_check_passed_time( $no_seconds ) {
-	$activation_time = get_option( 'hestia_time_activated' );
-	if ( ! empty( $activation_time ) ) {
-		$current_time    = time();
-		$time_difference = (int) $no_seconds;
-		if ( $current_time >= $activation_time + $time_difference ) {
-			return true;
-		} else {
-			return false;
-		}
+function zozo_theme_scripts() {
+	wp_enqueue_style( 'zozo-theme-style', get_stylesheet_uri(), array(), _S_VERSION );
+	wp_style_add_data( 'zozo-theme-style', 'rtl', 'replace' );
+
+	wp_enqueue_script( 'zozo-theme-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );
+
+	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+		wp_enqueue_script( 'comment-reply' );
 	}
-
-	return true;
 }
+add_action( 'wp_enqueue_scripts', 'zozo_theme_scripts' );
 
 /**
- * Legacy code function.
+ * Implement the Custom Header feature.
  */
-function hestia_setup_theme() {
-	return;
+require get_template_directory() . '/inc/custom-header.php';
+
+/**
+ * Custom template tags for this theme.
+ */
+require get_template_directory() . '/inc/template-tags.php';
+
+/**
+ * Functions which enhance the theme by hooking into WordPress.
+ */
+require get_template_directory() . '/inc/template-functions.php';
+
+/**
+ * Customizer additions.
+ */
+require get_template_directory() . '/inc/customizer.php';
+
+/**
+ * Load Jetpack compatibility file.
+ */
+if ( defined( 'JETPACK__VERSION' ) ) {
+	require get_template_directory() . '/inc/jetpack.php';
 }
 

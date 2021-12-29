@@ -1,47 +1,54 @@
 <?php
 /**
- * The default template for displaying content
+ * Template part for displaying page content in page.php
  *
- * Used for pages.
+ * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
  *
- * @package Hestia
- * @since Hestia 1.0
+ * @package zozo-theme
  */
+
 ?>
 
-<?php
-$sidebar_layout = apply_filters( 'hestia_sidebar_layout', get_theme_mod( 'hestia_page_sidebar_layout', 'full-width' ) );
-$wrap_class     = apply_filters( 'hestia_filter_page_content_classes', 'col-md-8 page-content-wrap ' );
-?>
+<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+	<header class="entry-header">
+		<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
+	</header><!-- .entry-header -->
 
-	<article id="post-<?php the_ID(); ?>" class="section section-text">
-		<div class="row">
+	<?php zozo_theme_post_thumbnail(); ?>
+
+	<div class="entry-content">
+		<?php
+		the_content();
+
+		wp_link_pages(
+			array(
+				'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'zozo-theme' ),
+				'after'  => '</div>',
+			)
+		);
+		?>
+	</div><!-- .entry-content -->
+
+	<?php if ( get_edit_post_link() ) : ?>
+		<footer class="entry-footer">
 			<?php
-			if ( $sidebar_layout === 'sidebar-left' ) {
-				do_action( 'hestia_page_sidebar' );
-			}
+			edit_post_link(
+				sprintf(
+					wp_kses(
+						/* translators: %s: Name of current post. Only visible to screen readers */
+						__( 'Edit <span class="screen-reader-text">%s</span>', 'zozo-theme' ),
+						array(
+							'span' => array(
+								'class' => array(),
+							),
+						)
+					),
+					wp_kses_post( get_the_title() )
+				),
+				'<span class="edit-link">',
+				'</span>'
+			);
 			?>
-			<div class="<?php echo esc_attr( $wrap_class ); ?>">
-				<?php
-				do_action( 'hestia_before_page_content' );
-
-				the_content();
-
-				echo apply_filters( 'hestia_filter_blog_social_icons', '' );
-
-				if ( comments_open() || get_comments_number() ) :
-					comments_template();
-				endif;
-				?>
-			</div>
-			<?php
-			if ( $sidebar_layout === 'sidebar-right' ) {
-				do_action( 'hestia_page_sidebar' );
-			}
-			?>
-		</div>
-	</article>
-<?php
-if ( is_paged() ) {
-	hestia_single_pagination();
-}
+		</footer><!-- .entry-footer -->
+	<?php endif; ?>
+</article><!-- #post-<?php the_ID(); ?> -->

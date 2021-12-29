@@ -1,37 +1,40 @@
 <?php
 /**
- * The template for displaying all single posts and attachments.
+ * The template for displaying all single posts
  *
- * @package Hestia
- * @since Hestia 1.0
+ * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#single-post
+ *
+ * @package zozo-theme
  */
 
 get_header();
-
-do_action( 'hestia_before_single_post_wrapper' );
 ?>
 
-<div class="<?php echo hestia_layout(); ?>">
-	<div class="blog-post blog-post-wrapper">
-		<div class="container">
-			<?php
-			if ( have_posts() ) :
-				while ( have_posts() ) :
-					the_post();
-					get_template_part( 'template-parts/content', 'single' );
-				endwhile;
-				else :
-					get_template_part( 'template-parts/content', 'none' );
+	<main id="primary" class="site-main">
+
+		<?php
+		while ( have_posts() ) :
+			the_post();
+
+			get_template_part( 'template-parts/content', get_post_type() );
+
+			the_post_navigation(
+				array(
+					'prev_text' => '<span class="nav-subtitle">' . esc_html__( 'Previous:', 'zozo-theme' ) . '</span> <span class="nav-title">%title</span>',
+					'next_text' => '<span class="nav-subtitle">' . esc_html__( 'Next:', 'zozo-theme' ) . '</span> <span class="nav-title">%title</span>',
+				)
+			);
+
+			// If comments are open or we have at least one comment, load up the comment template.
+			if ( comments_open() || get_comments_number() ) :
+				comments_template();
 			endif;
-				?>
-		</div>
-	</div>
-</div>
+
+		endwhile; // End of the loop.
+		?>
+
+	</main><!-- #main -->
 
 <?php
-if ( ! is_singular( 'elementor_library' ) ) {
-	do_action( 'hestia_blog_related_posts' );
-}
-?>
-<div class="footer-wrapper">
-	<?php get_footer(); ?>
+get_sidebar();
+get_footer();

@@ -1,35 +1,38 @@
 <?php
 /**
- * The template for displaying all single posts and attachments.
+ * The template for displaying all pages
  *
- * @package Hestia
- * @since Hestia 1.0
+ * This is the template that displays all pages by default.
+ * Please note that this is the WordPress construct of pages
+ * and that other 'pages' on your WordPress site may use a
+ * different template.
+ *
+ * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
+ *
+ * @package zozo-theme
  */
 
 get_header();
-
-do_action( 'hestia_before_single_page_wrapper' );
-
 ?>
-<div class="<?php echo hestia_layout(); ?>">
-	<?php
-	$class_to_add = '';
-	if ( class_exists( 'WooCommerce', false ) && ! is_cart() ) {
-		$class_to_add = 'blog-post-wrapper';
-	}
-	?>
-	<div class="blog-post <?php esc_attr( $class_to_add ); ?>">
-		<div class="container">
-			<?php
-			if ( have_posts() ) :
-				while ( have_posts() ) :
-					the_post();
-					get_template_part( 'template-parts/content', 'page' );
-				endwhile;
-				else :
-					get_template_part( 'template-parts/content', 'none' );
+
+	<main id="primary" class="site-main">
+
+		<?php
+		while ( have_posts() ) :
+			the_post();
+
+			get_template_part( 'template-parts/content', 'page' );
+
+			// If comments are open or we have at least one comment, load up the comment template.
+			if ( comments_open() || get_comments_number() ) :
+				comments_template();
 			endif;
-				?>
-		</div>
-	</div>
-	<?php get_footer(); ?>
+
+		endwhile; // End of the loop.
+		?>
+
+	</main><!-- #main -->
+
+<?php
+get_sidebar();
+get_footer();

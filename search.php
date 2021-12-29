@@ -1,57 +1,53 @@
 <?php
 /**
- * The main template file
+ * The template for displaying search results pages
  *
- * This is the most generic template file in a WordPress theme
- * and one of the two required files for a theme (the other being style.css).
- * It is used to display a page when nothing more specific matches a query.
- * e.g., it puts together the home page when no home.php file exists.
+ * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#search-result
  *
- * Learn more: {@link https://codex.wordpress.org/Template_Hierarchy}
- *
- * @package Hestia
- * @since Hestia 1.0
- * @modified 1.1.30
+ * @package zozo-theme
  */
 
-$default                    = hestia_get_blog_layout_default();
-$hestia_blog_sidebar_layout = apply_filters( 'hestia_sidebar_layout', get_theme_mod( 'hestia_blog_sidebar_layout', $default ) );
-$wrap_class                 = apply_filters( 'hestia_filter_index_search_content_classes', 'col-md-8 blog-posts-wrap' );
 get_header();
-
-do_action( 'hestia_before_search_wrapper' );
 ?>
 
-<div class="<?php echo hestia_layout(); ?>">
-	<div class="hestia-blogs" data-layout="<?php echo esc_attr( $hestia_blog_sidebar_layout ); ?>">
-		<div class="container">
-			<div class="row">
-				<?php
-				do_action( 'hestia_before_search_content' );
+	<main id="primary" class="site-main">
 
-				if ( $hestia_blog_sidebar_layout === 'sidebar-left' ) {
-					get_sidebar();
-				}
-				?>
-				<div class="<?php echo esc_attr( $wrap_class ); ?>">
+		<?php if ( have_posts() ) : ?>
+
+			<header class="page-header">
+				<h1 class="page-title">
 					<?php
-					if ( have_posts() ) :
-						while ( have_posts() ) :
-							the_post();
-							get_template_part( 'template-parts/content' );
-						endwhile;
-						the_posts_pagination();
-						else :
-							get_template_part( 'template-parts/content', 'none' );
-					endif;
-						?>
-				</div>
-				<?php
-				if ( $hestia_blog_sidebar_layout === 'sidebar-right' ) {
-					get_sidebar();
-				}
-				?>
-			</div>
-		</div>
-	</div>
-	<?php get_footer(); ?>
+					/* translators: %s: search query. */
+					printf( esc_html__( 'Search Results for: %s', 'zozo-theme' ), '<span>' . get_search_query() . '</span>' );
+					?>
+				</h1>
+			</header><!-- .page-header -->
+
+			<?php
+			/* Start the Loop */
+			while ( have_posts() ) :
+				the_post();
+
+				/**
+				 * Run the loop for the search to output the results.
+				 * If you want to overload this in a child theme then include a file
+				 * called content-search.php and that will be used instead.
+				 */
+				get_template_part( 'template-parts/content', 'search' );
+
+			endwhile;
+
+			the_posts_navigation();
+
+		else :
+
+			get_template_part( 'template-parts/content', 'none' );
+
+		endif;
+		?>
+
+	</main><!-- #main -->
+
+<?php
+get_sidebar();
+get_footer();
