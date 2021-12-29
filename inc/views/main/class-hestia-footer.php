@@ -89,6 +89,7 @@ class Hestia_Footer extends Hestia_Abstract_Main {
 				<?php $this->render_footer_sidebars(); ?>
 				<?php hestia_after_footer_widgets_trigger(); ?>
 				<?php $this->wrapped_bottom_footer_content(); ?>
+                All rights reserved to Hestia.
 			</div>
 			<?php hestia_after_footer_content_trigger(); ?>
 		</footer>
