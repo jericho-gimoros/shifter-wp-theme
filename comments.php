@@ -1,59 +1,79 @@
 <?php
-if ( post_password_required() ):
+/**
+ * The template for displaying comments
+ *
+ * The area of the page that contains both current comments
+ * and the comment form.
+ *
+ * @package Hestia
+ * @since   Hestia 1.0
+ */
+
+/*
+ * If the current post is protected by a password and
+ * the visitor has not yet entered the password we will
+ * return early without loading the comments.
+ */
+if ( post_password_required() ) {
 	return;
-endif;
+}
 ?>
 
+<div id="comments" class="section section-comments">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="media-area">
+				<h3 class="hestia-title text-center">
+					<?php
+					$comments_number = get_comments_number();
+					if ( 0 !== $comments_number ) {
+						if ( 1 === $comments_number ) {
+							/* translators: %s: post title */
+							_x( 'One comment', 'comments title', 'hestia' );
+						} else {
+							printf(
+								/* translators: 1: number of comments, 2: post title */
+								_nx(
+									'%1$s Comment',
+									'%1$s Comments',
+									$comments_number,
+									'comments title',
+									'hestia'
+								),
+								number_format_i18n( $comments_number )
+							);
+						}
+					}
+					?>
+				</h3>
+				<?php
+				wp_list_comments( 'type=comment&callback=hestia_comments_list' );
+				wp_list_comments( 'type=pings&callback=hestia_comments_list' );
 
-<div class="post-comments">
-        <h3 class="comments-title">
-    	<span class="comments-number">
-				<?php comments_number( __( 'No Responses', 'brite' ), __( 'One Response', 'brite' ),
-					__( '% Responses', 'brite' ) ); ?>
-    	</span>
-        </h3>
+				$pages = paginate_comments_links(
+					array(
+						'echo' => false,
+						'type' => 'array',
+					)
+				);
+				if ( is_array( $pages ) ) {
+					echo '<div class="text-center"><ul class="nav pagination pagination-primary">';
+					foreach ( $pages as $page ) {
+						echo '<li>' . $page . '</li>';
+					}
+					echo '</ul></div>';
+				}
 
-        <ol class="comment-list">
-			<?php
-			wp_list_comments( array(
-				'avatar_size' => '32',
-			) );
-			?>
-        </ol>
-
-		<?php
-		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ):
-			?>
-            <div class="navigation">
-                <div class="prev-posts">
-					<?php previous_comments_link( __( '<i class="font-icon-post fa fa-angle-double-left"></i> Older Comments',
-						'brite' ) ); ?>
-                </div>
-                <div class="next-posts">
-					<?php next_comments_link( __( 'Newer Comments <i class="font-icon-post fa fa-angle-double-right"></i>',
-						'brite' ) ); ?>
-                </div>
-            </div>
-	<?php endif; ?>
-
-	<?php
-	if ( ! comments_open() && get_comments_number() && post_type_supports( get_post_type(), 'comments' ) ):
-		?>
-        <p class="no-comments"><?php esc_html_e( 'Comments are closed.', 'brite' ); ?></p>
-	<?php
-	endif;
-	?>
-
-</div>
-<!-- /post-comments -->
-
-<div class="comments-form">
-    <div class="comment-form">
-		<?php comment_form(
-			array(
-				'class_submit' => 'button blue small',
-			)
-		);
-		?>
-    </div>
+				?>
+			</div>
+			<div class="media-body">
+				<?php comment_form( hestia_comments_template() ); ?>
+				<?php if ( ! comments_open() && get_comments_number() ) : ?>
+					<?php if ( is_single() ) : ?>
+						<h4 class="no-comments hestia-title text-center"><?php esc_html_e( 'Comments are closed.', 'hestia' ); ?></h4>
+					<?php endif; ?>
+				<?php endif; ?>
+			</div>
+		</div>
+	</div>
 </div>

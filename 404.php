@@ -1,3 +1,10 @@
-<?php get_header(); ?>
-<?php brite_theme()->get( 'page-not-found' )->render(); ?>
-<?php get_footer();
+<?php
+/**
+ * 404 template.
+ *
+ * @package Hestia
+ */
+
+get_header();
+do_action( 'hestia_do_404' );
+get_footer();
