@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  composer:
+    image: composer:latest
+    container_name: zozo_theme_composer
+    environment:
+      TZ: 'Asia/Tokyo'
+      COMPOSER_HOME: '/composer'
+    entrypoint: /usr/local/bin/composer.sh
+    working_dir: /var/www/html
+    volumes:
+      - ./docker/composer/entrypoint.sh:/usr/local/bin/composer.sh:ro
+      - .:/var/www/html
+
+  node:
+    image: nikolaik/python-nodejs:python3.8-nodejs12-bullseye
+    container_name: zozo_theme_node
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
