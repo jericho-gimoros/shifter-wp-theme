@@ -32,7 +32,7 @@ get_header();
 		?>
 
 	</main><!-- #main -->
-
+   Update page PHP.
 <?php
 get_sidebar();
 get_footer();
